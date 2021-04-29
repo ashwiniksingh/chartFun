@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.0/dist/chart.min.js"></script>
+</head>
+
+<body>
+    <canvas id="canvas" width="800" height="300"></canvas>
+    <script>
+        // https://data.giss.nasa.gov/gistemp
+        //
+        renderChart();
+        async function renderChart() {
+            const data = await getData();
+            var ctx = document.getElementById('canvas').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.x,
+                    datasets: [{
+                        label: 'Global Average Sea Level Temps',
+                        data: data.y,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor:'rgba(255, 99, 132, 1)',
+                        borderWidth: 0.5
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            ticks: {
+                                // Include a dollar sign in the ticks
+                                callback: function(value, index, values) {
+                                    return value+'°';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        async function getData() {
+            const x = [];
+            const y = [];
+            const response = await fetch('test.csv');
+            const data = await response.text();
+            const table = data.split(/\n/).slice(1);
+            table.forEach(row => {
+                const column = row.split(',');
+                const year = column[0];
+                x.push(year)
+                const temp = column[1];
+                y.push(parseFloat(temp)+14); //14 is mean temp
+            })
+            return {x,y}
+        }
+    </script>
+</body>
+
+</html>
